@@ -1,5 +1,8 @@
 package chess;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import boardgame.Board;
 import boardgame.Piece;
 import boardgame.Position;
@@ -10,6 +13,10 @@ public class ChessMatch {
 
 	private int turn;
 	private Color currentPlayer;
+	private Board board;
+	
+	private List<Piece> piecesOnTheBoard = new ArrayList<>();
+	private List<Piece> capturedPieces = new ArrayList<>();
 	
 	public int getTurn() {
 		return turn;
@@ -18,8 +25,6 @@ public class ChessMatch {
 	public Color getCurrentPlayer() {
 		return this.currentPlayer;
 	}
-	
-	private Board board;
 
 	public ChessMatch() {
 		board = new Board(8, 8);
@@ -55,6 +60,20 @@ public class ChessMatch {
 		return (ChessPiece)capturedPiece;
 	}
 	
+	private Piece makeMove(Position source, Position target) {
+		Piece p = board.removePiece(source);
+		Piece capturedPiece = board.removePiece(target);
+		board.placePiece(p, target);
+		
+		if(capturedPiece != null) {
+			piecesOnTheBoard.remove(capturedPiece);
+			capturedPieces.add(capturedPiece);
+		}
+		
+		return capturedPiece;
+	}
+
+	
 	private void validateSoucerPosition(Position position) {
 		if(!board.thereIsAPiece(position)) {
 			throw new ChessException("Não há peça na posição de origem");
@@ -77,16 +96,10 @@ public class ChessMatch {
 		turn++;
 		currentPlayer = (currentPlayer == Color.WHITE) ? Color.BLACK : Color.WHITE;
 	}
-	
-	private Piece makeMove(Position source, Position target) {
-		Piece p = board.removePiece(source);
-		Piece capturedPiece = board.removePiece(target);
-		board.placePiece(p, target);
-		return capturedPiece;
-	}
 
 	private void placeNewPiece(char column, int row, ChessPiece piece) {
 		board.placePiece(piece, new ChessPosition(column, row).toPosition());
+		piecesOnTheBoard.add(piece);
 	}
 
 	private void initialSetup() {
